@@ -5,6 +5,7 @@ ENV TS_VERSION=${TS_VERSION:-6.1.1}
 ENV TS_PKG=${TS_PKG:-trafficserver-$TS_VERSION.tar.bz2}
 ENV TS_URL=${TS_URL:-http://www-us.apache.org/dist/trafficserver/$TS_PKG}
 ENV TS_PATH=${TS_PATH:-/opt/trafficserver}
+ENV PATH=$TS_PATH/bin:$PATH
 
 RUN apt-get update \
     && apt-get upgrade -y \
@@ -17,9 +18,13 @@ RUN apt-get update \
     && ln -sf /etc/trafficserver $TS_PATH/etc/trafficserver \
     && rm -rf /tmp/* && apt-get purge -y bzip2 build-essential
 
-COPY config/* /etc/trafficserver
+COPY config/* /etc/trafficserver/
+COPY docker-entrypoint.sh /docker-entrypoint.sh
 
-EXPOSE 8080
+RUN chmod 0755 /docker-entrypoint.sh && chown -R nobody:nogroup /etc/trafficserver
 
-CMD ["/opt/trafficserver/bin/traffic_server"]
+EXPOSE 8080 8083
 
+ENTRYPOINT ["/docker-entrypoint.sh"]
+
+CMD ["/opt/trafficserver/bin/traffic_logcat", "-f", "opt/trafficserver/var/log/trafficserver/diags.log"]
