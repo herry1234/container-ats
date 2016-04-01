@@ -27,4 +27,4 @@ EXPOSE 8080 8083
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
 
-CMD ["/opt/trafficserver/bin/traffic_logcat", "-f", "opt/trafficserver/var/log/trafficserver/diags.log"]
+CMD ["/opt/trafficserver/bin/traffic_logcat", "-f", "opt/trafficserver/var/log/trafficserver/squid.blog"]
