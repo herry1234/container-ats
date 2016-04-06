@@ -19,13 +19,13 @@ RUN apt-get update \
     && rm -rf /tmp/* && apt-get purge -y bzip2 build-essential
 
 COPY config/* /etc/trafficserver/
+COPY access_log_out.sh /opt/access_log_out.sh
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 
-RUN chmod 0755 /docker-entrypoint.sh && chown -R nobody:nogroup /etc/trafficserver
+RUN chmod 0755 /docker-entrypoint.sh /opt/access_log_out.sh && chown -R nobody:nogroup /etc/trafficserver
 
 EXPOSE 8080 8083
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
 
-#CMD ["/opt/trafficserver/bin/traffic_logcat", "-f", "opt/trafficserver/var/log/trafficserver/squid.blog"]
-CMD ["tail", "-f", "opt/trafficserver/var/log/trafficserver/access.log"]
+CMD ["/opt/trafficserver/bin/traffic_cop", "-o"]
