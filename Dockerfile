@@ -9,7 +9,7 @@ ENV PATH=$TS_PATH/bin:$PATH
 
 RUN apt-get update \
     && apt-get upgrade -y \
-    && apt-get install -y wget build-essential locales bzip2 libssl-dev libxml2-dev libpcre3-dev tcl-dev libboost-dev \
+    && apt-get install -y wget build-essential locales bzip2 libssl-dev libxml2-dev libpcre3-dev tcl-dev libboost-dev supervisor \
     && mkdir -p $TS_PATH \
     && wget $TS_URL -O /tmp/$TS_PKG && tar -xjf /tmp/$TS_PKG -C /tmp && cd /tmp/trafficserver-$TS_VERSION \
     && ./configure --prefix=$TS_PATH \
@@ -19,13 +19,14 @@ RUN apt-get update \
     && rm -rf /tmp/* && apt-get purge -y bzip2 build-essential
 
 COPY config/* /etc/trafficserver/
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY access_log_out.sh /opt/access_log_out.sh
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 
-RUN chmod 0755 /docker-entrypoint.sh && chown -R nobody:nogroup /etc/trafficserver
+RUN chmod 0755 /docker-entrypoint.sh /opt/access_log_out.sh && chown -R nobody:nogroup /etc/trafficserver
 
 EXPOSE 8080 8083
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
 
-#CMD ["/opt/trafficserver/bin/traffic_logcat", "-f", "opt/trafficserver/var/log/trafficserver/squid.blog"]
-CMD ["tail", "-f", "opt/trafficserver/var/log/trafficserver/access.log"]
+CMD ["/usr/bin/supervisord"]
