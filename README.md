@@ -15,4 +15,4 @@ docker-compose up
 ```
 
 ### Todo
- storage usage. maybe mount log dir to host.
+ - we run ATS container with `gelf` log output, so we need separate process which will output access log to stdout. May be it will be better to mount volume on the host, turn on rolling of the logs. So the init process will be traffic_cop and no supervisord.
