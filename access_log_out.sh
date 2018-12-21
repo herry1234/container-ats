@@ -6,11 +6,11 @@ while ! echo -e "GET /disregard HTTP/1.1\n\n" | nc localhost 8080 | grep HTTP
     sleep 3
 done
 
-# temporary hardcode for testing purposes. waiting when traffic_server will create access.log
-while [ ! -f $TS_PATH/var/log/trafficserver/access.log ]; do
-    echo "access.log does not exist yet. Waiting..."
+# temporary hardcode for testing purposes. waiting when traffic_server will create squid.log
+while [ ! -f $TS_PATH/var/log/trafficserver/squid.log ]; do
+    echo "squid.log does not exist yet. Waiting..."
     sleep 5
 done
 
-#exec tail -f /opt/trafficserver/var/log/trafficserver/access.log
-tail -f $TS_PATH/var/log/trafficserver/access.log
+#exec tail -f /opt/trafficserver/var/log/trafficserver/squid.log
+tail -f $TS_PATH/var/log/trafficserver/squid.log

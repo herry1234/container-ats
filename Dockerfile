@@ -1,22 +1,44 @@
-FROM ubuntu:14.04
-MAINTAINER ssokol@softserveinc.com
+FROM ubuntu:18.04
+LABEL maintainer="tech.herry@gmail.com"
 
-ENV TS_VERSION=${TS_VERSION:-6.1.1}
+ENV TS_VERSION=${TS_VERSION:-8.0.1}
 ENV TS_PKG=${TS_PKG:-trafficserver-$TS_VERSION.tar.bz2}
-ENV TS_URL=${TS_URL:-http://www-us.apache.org/dist/trafficserver/$TS_PKG}
+ENV TS_URL=${TS_URL:-http://mirrors.gigenet.com/apache/trafficserver/$TS_PKG}
 ENV TS_PATH=${TS_PATH:-/opt/trafficserver}
 ENV PATH=$TS_PATH/bin:$PATH
-
-RUN apt-get update \
-    && apt-get upgrade -y \
-    && apt-get install -y wget build-essential locales bzip2 libssl-dev libxml2-dev libpcre3-dev tcl-dev libboost-dev supervisor \
+RUN set -x \
+    && DEBIAN_FRONTEND=noninteractive apt-get update \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y \
+        curl \
+        build-essential \
+        netcat \
+        locales \
+        bzip2 \
+        libssl-dev \
+        libxml2-dev \
+        libpcre3-dev \
+        tcl \
+        tcl-dev \
+        libboost-dev \
+        supervisor \
     && mkdir -p $TS_PATH \
-    && wget $TS_URL -O /tmp/$TS_PKG && tar -xjf /tmp/$TS_PKG -C /tmp && cd /tmp/trafficserver-$TS_VERSION \
+    && mkdir /tmp/ts \
+    && cd /tmp/ts \
+    && curl -L $TS_URL | tar -xj --strip-components 1 \
     && ./configure --prefix=$TS_PATH \
     && make && make install \
     && mv $TS_PATH/etc/trafficserver /etc/trafficserver \
     && ln -sf /etc/trafficserver $TS_PATH/etc/trafficserver \
-    && rm -rf /tmp/* && apt-get purge -y bzip2 build-essential
+    && apt-get purge --auto-remove -y \
+        bzip2 \
+        build-essential \
+        libssl-dev \
+        libxml2-dev \
+        libpcre3-dev \
+        tcl-dev \
+        libboost-dev \
+    && apt-get clean \
+    && rm -rf /tmp/*
 
 COPY config/* /etc/trafficserver/
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
